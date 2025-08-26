@@ -1,5 +1,5 @@
 # Multi-stage build optimized for Digital Ocean deployment
-FROM node:18 AS builder
+FROM node:20 AS builder
 
 # Set working directory
 WORKDIR /app
@@ -17,7 +17,7 @@ COPY . .
 RUN npm run build
 
 # Production stage
-FROM node:18 AS production
+FROM node:20 AS production
 
 # Install curl for health checks
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
@@ -33,7 +33,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install only production dependencies
-RUN npm install --only=production --legacy-peer-deps && npm cache clean --force
+RUN npm ci --omit=dev --legacy-peer-deps && npm cache clean --force
 
 # Copy built application from builder stage
 COPY --from=builder --chown=nextjs:nodejs /app/dist ./dist
