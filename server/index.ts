@@ -410,15 +410,11 @@ export async function createServer() {
     authMiddleware,
     handleUpdateUserStatus,
   );
-  app.get(
-    "/api/admin/bookings",
-    authMiddleware,
-    useSupabase ? handleGetAllSupabaseBookings : handleGetAllBookings,
-  );
+  app.get("/api/admin/bookings", authMiddleware, handleGetAllBookings);
   app.put(
     "/api/admin/bookings/:bookingId/status",
     authMiddleware,
-    useSupabase ? handleUpdateSupabaseBookingStatus : handleUpdateBookingStatus,
+    handleUpdateBookingStatus,
   );
   app.get(
     "/api/admin/support/tickets",
