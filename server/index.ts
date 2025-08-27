@@ -284,7 +284,10 @@ export async function createServer() {
   );
 
   // Initialize database if using Supabase (only at runtime, not during build)
-  if (useSupabase && (process.env.NODE_ENV !== "production" || process.env.PORT)) {
+  if (
+    useSupabase &&
+    (process.env.NODE_ENV !== "production" || process.env.PORT)
+  ) {
     console.log("🔄 Initializing database...");
     DatabaseInitializer.initialize()
       .then((success) => {
