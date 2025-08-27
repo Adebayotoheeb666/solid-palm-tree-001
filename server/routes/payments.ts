@@ -703,23 +703,23 @@ export const handleCapturePayPalPayment: RequestHandler = async (req, res) => {
   try {
     const { orderId, payerId } = req.body;
 
+    console.log("🔍 PayPal Capture Request:", {
+      orderId,
+      payerId,
+      body: req.body,
+    });
+
     if (!orderId || !payerId) {
+      console.log("❌ Missing required fields");
       return res.status(400).json({
         success: false,
         message: "Missing order ID or payer ID",
       });
     }
 
-    console.log(
-      "Capturing PayPal payment for order:",
-      orderId,
-      "payer:",
-      payerId,
-    );
-
     // Handle mock orders for development
     if (orderId.startsWith("mock_order_") || payerId === "mock_payer") {
-      console.log("PayPal demo mode - returning mock capture response");
+      console.log("✅ PayPal demo mode - returning mock capture response");
       return res.json({
         success: true,
         captureId: `mock_capture_${Date.now()}`,
@@ -727,35 +727,59 @@ export const handleCapturePayPalPayment: RequestHandler = async (req, res) => {
       });
     }
 
+    console.log("🔑 Getting PayPal access token...");
     const accessToken = await getPayPalAccessToken();
+    console.log("✅ Access token obtained");
 
-    const response = await fetch(
-      `${PAYPAL_BASE_URL}/v2/checkout/orders/${orderId}/capture`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
+    const captureUrl = `${PAYPAL_BASE_URL}/v2/checkout/orders/${orderId}/capture`;
+    console.log("📡 Making capture request to:", captureUrl);
+
+    const response = await fetch(captureUrl, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
       },
-    );
+    });
+
+    console.log("📡 PayPal capture response:", {
+      status: response.status,
+      statusText: response.statusText,
+      ok: response.ok,
+    });
 
     if (!response.ok) {
-      throw new Error("Failed to capture PayPal payment");
+      let errorDetails;
+      try {
+        errorDetails = await response.json();
+        console.error("❌ PayPal capture error details:", errorDetails);
+      } catch (parseError) {
+        console.error("❌ Failed to parse PayPal error response:", parseError);
+        errorDetails = { message: "Failed to parse error response" };
+      }
+
+      return res.status(response.status).json({
+        success: false,
+        message: errorDetails.message || "Failed to capture PayPal payment",
+        details: errorDetails,
+      });
     }
 
     const capture = await response.json();
+    console.log("✅ PayPal capture successful:", capture);
 
     res.json({
       success: true,
       captureId: capture.id,
       status: capture.status,
+      capture: capture,
     });
   } catch (error) {
-    console.error("PayPal capture error:", error);
+    console.error("❌ PayPal capture error:", error);
     res.status(500).json({
       success: false,
-      message: "Failed to capture PayPal payment",
+      message: error instanceof Error ? error.message : "Failed to capture PayPal payment",
+      error: error instanceof Error ? error.stack : error,
     });
   }
 };
