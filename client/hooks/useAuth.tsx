@@ -192,7 +192,7 @@ export const useAuthenticatedFetch = () => {
     console.log("🔍 AuthenticatedFetch Debug:", {
       url,
       hasToken: !!token,
-      tokenPrefix: token ? token.substring(0, 10) + "..." : "none"
+      tokenPrefix: token ? token.substring(0, 10) + "..." : "none",
     });
 
     const headers = {
@@ -210,7 +210,7 @@ export const useAuthenticatedFetch = () => {
       url,
       status: response.status,
       statusText: response.statusText,
-      ok: response.ok
+      ok: response.ok,
     });
 
     return response;

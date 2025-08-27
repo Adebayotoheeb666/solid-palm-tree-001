@@ -33,7 +33,6 @@ export const handleHybridRegister: RequestHandler = async (req, res) => {
     const result = await HybridAuthSystem.register(validation.data);
     const statusCode = result.success ? 201 : 409;
     res.status(statusCode).json(result);
-
   } catch (error) {
     console.error("Registration error:", error);
     const response: AuthResponse = {
@@ -60,7 +59,6 @@ export const handleHybridLogin: RequestHandler = async (req, res) => {
     const result = await HybridAuthSystem.login(validation.data);
     const statusCode = result.success ? 200 : 401;
     res.status(statusCode).json(result);
-
   } catch (error) {
     console.error("Login error:", error);
     const response: AuthResponse = {
@@ -131,7 +129,7 @@ export const hybridAuthMiddleware: RequestHandler = async (req, res, next) => {
       method: req.method,
       hasAuthHeader: !!authHeader,
       hasToken: !!token,
-      tokenPrefix: token ? token.substring(0, 10) + "..." : "none"
+      tokenPrefix: token ? token.substring(0, 10) + "..." : "none",
     });
 
     if (!token) {
@@ -155,7 +153,12 @@ export const hybridAuthMiddleware: RequestHandler = async (req, res, next) => {
         .json({ success: false, message: "User not found" });
     }
 
-    console.log("✅ Authentication successful for", req.url, "user:", user.email);
+    console.log(
+      "✅ Authentication successful for",
+      req.url,
+      "user:",
+      user.email,
+    );
     // Add user to request object
     (req as any).user = user;
     next();

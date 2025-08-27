@@ -322,7 +322,10 @@ export default function Payment() {
       const isAuthenticated = !!token && !!user;
 
       console.log("Creating booking for Stripe payment:", bookingRequest);
-      console.log("Using API:", isAuthenticated ? "/api/bookings" : "/api/guest/bookings");
+      console.log(
+        "Using API:",
+        isAuthenticated ? "/api/bookings" : "/api/guest/bookings",
+      );
 
       const bookingResponse = isAuthenticated
         ? await authenticatedFetch("/api/bookings", {
@@ -374,9 +377,9 @@ export default function Payment() {
 
       if (err instanceof Error) {
         errorMessage = err.message;
-      } else if (typeof err === 'string') {
+      } else if (typeof err === "string") {
         errorMessage = err;
-      } else if (err && typeof err === 'object' && 'message' in err) {
+      } else if (err && typeof err === "object" && "message" in err) {
         errorMessage = (err as any).message || errorMessage;
       }
 
@@ -466,7 +469,10 @@ export default function Payment() {
       console.log("Sending booking request...");
       console.log("Auth token:", token ? "Present" : "Missing");
       console.log("User context:", user ? "Logged in" : "Guest");
-      console.log("Using API:", isAuthenticated ? "/api/bookings" : "/api/guest/bookings");
+      console.log(
+        "Using API:",
+        isAuthenticated ? "/api/bookings" : "/api/guest/bookings",
+      );
 
       const bookingResponse = isAuthenticated
         ? await authenticatedFetch("/api/bookings", {
@@ -495,7 +501,8 @@ export default function Payment() {
 
           // Special handling for authentication errors
           if (bookingResponse.status === 401) {
-            errorMessage = "Authentication failed. Please log in again and try again.";
+            errorMessage =
+              "Authentication failed. Please log in again and try again.";
             // Clear invalid token
             localStorage.removeItem("authToken");
           }
@@ -503,7 +510,8 @@ export default function Payment() {
           console.error("Failed to parse error response:", parseError);
           // For 401 errors, provide a helpful message even if we can't parse the response
           if (bookingResponse.status === 401) {
-            errorMessage = "Authentication failed. Please log in again and try again.";
+            errorMessage =
+              "Authentication failed. Please log in again and try again.";
             localStorage.removeItem("authToken");
           }
         }
@@ -563,10 +571,14 @@ export default function Payment() {
           const errorData = await paypalOrderResponse.json();
 
           // Improved error message extraction
-          if (typeof errorData === 'string') {
+          if (typeof errorData === "string") {
             errorMessage = errorData;
-          } else if (errorData && typeof errorData === 'object') {
-            errorMessage = errorData.message || errorData.error || errorData.details || JSON.stringify(errorData);
+          } else if (errorData && typeof errorData === "object") {
+            errorMessage =
+              errorData.message ||
+              errorData.error ||
+              errorData.details ||
+              JSON.stringify(errorData);
           }
 
           console.error("PayPal order creation failed:", errorData);
@@ -612,13 +624,14 @@ export default function Payment() {
       }
     } catch (err) {
       console.error("PayPal payment error:", err);
-      let errorMessage = "An error occurred while processing PayPal payment. Please try again.";
+      let errorMessage =
+        "An error occurred while processing PayPal payment. Please try again.";
 
       if (err instanceof Error) {
         errorMessage = err.message;
-      } else if (typeof err === 'string') {
+      } else if (typeof err === "string") {
         errorMessage = err;
-      } else if (err && typeof err === 'object' && 'message' in err) {
+      } else if (err && typeof err === "object" && "message" in err) {
         errorMessage = (err as any).message;
       }
 
@@ -691,7 +704,10 @@ export default function Payment() {
       const isAuthenticated = !!token && !!user;
 
       console.log("Creating booking for card payment");
-      console.log("Using API:", isAuthenticated ? "/api/bookings" : "/api/guest/bookings");
+      console.log(
+        "Using API:",
+        isAuthenticated ? "/api/bookings" : "/api/guest/bookings",
+      );
 
       const bookingResponse = isAuthenticated
         ? await authenticatedFetch("/api/bookings", {

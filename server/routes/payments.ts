@@ -718,7 +718,12 @@ export const handleCapturePayPalPayment: RequestHandler = async (req, res) => {
     }
 
     // Handle demo/mock orders for development - check this FIRST before trying to get access token
-    if (orderId.startsWith("demo_order_") || orderId.startsWith("mock_order_") || payerId === "demo_payer" || payerId === "mock_payer") {
+    if (
+      orderId.startsWith("demo_order_") ||
+      orderId.startsWith("mock_order_") ||
+      payerId === "demo_payer" ||
+      payerId === "mock_payer"
+    ) {
       console.log("✅ PayPal demo mode - returning mock capture response");
       return res.json({
         success: true,
@@ -778,7 +783,10 @@ export const handleCapturePayPalPayment: RequestHandler = async (req, res) => {
     console.error("❌ PayPal capture error:", error);
     res.status(500).json({
       success: false,
-      message: error instanceof Error ? error.message : "Failed to capture PayPal payment",
+      message:
+        error instanceof Error
+          ? error.message
+          : "Failed to capture PayPal payment",
       error: error instanceof Error ? error.stack : error,
     });
   }

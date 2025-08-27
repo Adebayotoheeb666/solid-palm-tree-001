@@ -11,15 +11,15 @@ export default function PaymentSuccess() {
   const { user } = useAuth();
   const authenticatedFetch = useAuthenticatedFetch();
   const { success: showSuccess, error: showError } = useNotifications();
-  
+
   const [processing, setProcessing] = useState(true);
   const [error, setError] = useState("");
   const [paymentComplete, setPaymentComplete] = useState(false);
 
   useEffect(() => {
     const capturePayPalPayment = async () => {
-      const orderId = searchParams.get('token');
-      const payerId = searchParams.get('PayerID');
+      const orderId = searchParams.get("token");
+      const payerId = searchParams.get("PayerID");
 
       if (!orderId || !payerId) {
         setError("Missing payment information");
@@ -36,26 +36,26 @@ export default function PaymentSuccess() {
           orderId,
           payerId,
           isAuthenticated,
-          hasUser: !!user
+          hasUser: !!user,
         });
 
         // Capture the PayPal payment (supports both authenticated and guest users)
         const captureResponse = isAuthenticated
-          ? await authenticatedFetch('/api/payments/paypal/capture', {
-              method: 'POST',
+          ? await authenticatedFetch("/api/payments/paypal/capture", {
+              method: "POST",
               body: JSON.stringify({ orderId, payerId }),
             })
-          : await fetch('/api/payments/paypal/capture', {
-              method: 'POST',
+          : await fetch("/api/payments/paypal/capture", {
+              method: "POST",
               headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
               },
               body: JSON.stringify({ orderId, payerId }),
             });
 
         console.log("🔍 Capture Response:", {
           status: captureResponse.status,
-          ok: captureResponse.ok
+          ok: captureResponse.ok,
         });
 
         let captureResult;
@@ -67,10 +67,14 @@ export default function PaymentSuccess() {
           const responseClone = captureResponse.clone();
           try {
             const errorData = await responseClone.json();
-            if (typeof errorData === 'string') {
+            if (typeof errorData === "string") {
               errorMessage = errorData;
-            } else if (errorData && typeof errorData === 'object') {
-              errorMessage = errorData.message || errorData.error || errorData.details || JSON.stringify(errorData);
+            } else if (errorData && typeof errorData === "object") {
+              errorMessage =
+                errorData.message ||
+                errorData.error ||
+                errorData.details ||
+                JSON.stringify(errorData);
             }
             console.error("PayPal capture failed:", errorData);
           } catch (parseError) {
@@ -83,7 +87,10 @@ export default function PaymentSuccess() {
         try {
           captureResult = await captureResponse.json();
         } catch (parseError) {
-          console.error("Failed to parse capture success response:", parseError);
+          console.error(
+            "Failed to parse capture success response:",
+            parseError,
+          );
           throw new Error("Failed to parse PayPal capture response");
         }
 
@@ -94,22 +101,27 @@ export default function PaymentSuccess() {
           showSuccess("Payment successful!", "Your booking has been confirmed");
 
           // Clear stored data
-          localStorage.removeItem('selectedRoute');
-          localStorage.removeItem('passengerData');
-          localStorage.removeItem('currentBooking');
-          localStorage.removeItem('selectedFlight');
+          localStorage.removeItem("selectedRoute");
+          localStorage.removeItem("passengerData");
+          localStorage.removeItem("currentBooking");
+          localStorage.removeItem("selectedFlight");
 
           // Redirect after short delay
           setTimeout(() => {
-            navigate('/userform/thankyou');
+            navigate("/userform/thankyou");
           }, 3000);
         } else {
-          throw new Error(captureResult.message || 'PayPal payment capture failed');
+          throw new Error(
+            captureResult.message || "PayPal payment capture failed",
+          );
         }
       } catch (err) {
-        console.error('Payment capture error:', err);
-        setError('Failed to complete payment. Please contact support.');
-        showError("Payment Error", "There was an issue processing your payment");
+        console.error("Payment capture error:", err);
+        setError("Failed to complete payment. Please contact support.");
+        showError(
+          "Payment Error",
+          "There was an issue processing your payment",
+        );
       } finally {
         setProcessing(false);
       }
@@ -122,7 +134,10 @@ export default function PaymentSuccess() {
     <div className="min-h-screen bg-[#E7E9FF] font-jakarta">
       {/* Header */}
       <header className="container mx-auto px-4 md:px-12 py-4">
-        <div className="flex items-center cursor-pointer" onClick={() => navigate("/")}> 
+        <div
+          className="flex items-center cursor-pointer"
+          onClick={() => navigate("/")}
+        >
           <img
             src="/onboard/result.png"
             alt="OnboardTicket Logo"
@@ -136,7 +151,6 @@ export default function PaymentSuccess() {
       <div className="container mx-auto px-4 md:px-12 py-16">
         <div className="max-w-2xl mx-auto">
           <div className="bg-white/90 backdrop-blur-md rounded-[24px] p-8 md:p-12 shadow-xl border border-[#E7E9FF] text-center">
-            
             {processing && (
               <>
                 <div className="mb-8">
@@ -160,11 +174,13 @@ export default function PaymentSuccess() {
                   Payment Successful!
                 </h1>
                 <p className="text-lg text-[#637996] mb-6">
-                  Your PayPal payment has been processed successfully. Your booking is confirmed!
+                  Your PayPal payment has been processed successfully. Your
+                  booking is confirmed!
                 </p>
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
                   <p className="text-green-700 font-medium">
-                    You will receive a confirmation email shortly with your ticket details.
+                    You will receive a confirmation email shortly with your
+                    ticket details.
                   </p>
                 </div>
                 <p className="text-sm text-[#637996]">
@@ -183,18 +199,16 @@ export default function PaymentSuccess() {
                 <h1 className="text-3xl md:text-4xl font-extrabold text-red-600 mb-4">
                   Payment Error
                 </h1>
-                <p className="text-lg text-[#637996] mb-6">
-                  {error}
-                </p>
+                <p className="text-lg text-[#637996] mb-6">{error}</p>
                 <div className="space-y-4">
                   <button
-                    onClick={() => navigate('/payment')}
+                    onClick={() => navigate("/payment")}
                     className="bg-[#3839C9] text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
                   >
                     Try Again
                   </button>
                   <button
-                    onClick={() => navigate('/contact')}
+                    onClick={() => navigate("/contact")}
                     className="block mx-auto text-[#3839C9] hover:text-blue-700 font-medium"
                   >
                     Contact Support

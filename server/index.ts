@@ -326,7 +326,11 @@ export async function createServer() {
   app.post("/api/bookings", authMiddleware, handleCreateBooking);
   app.get("/api/bookings", authMiddleware, handleGetUserBookings);
   app.get("/api/bookings/:bookingId", authMiddleware, handleGetBookingDetails);
-  app.put("/api/bookings/:bookingId/cancel", authMiddleware, handleCancelBooking);
+  app.put(
+    "/api/bookings/:bookingId/cancel",
+    authMiddleware,
+    handleCancelBooking,
+  );
 
   // Payment routes (authenticated)
   app.post("/api/payments", authMiddleware, handleProcessPayment);
