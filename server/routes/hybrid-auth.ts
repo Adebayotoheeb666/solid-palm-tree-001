@@ -126,7 +126,16 @@ export const hybridAuthMiddleware: RequestHandler = async (req, res, next) => {
     const authHeader = req.headers.authorization;
     const token = authHeader?.replace("Bearer ", "");
 
+    console.log("🔍 Hybrid Auth Middleware Debug:", {
+      url: req.url,
+      method: req.method,
+      hasAuthHeader: !!authHeader,
+      hasToken: !!token,
+      tokenPrefix: token ? token.substring(0, 10) + "..." : "none"
+    });
+
     if (!token) {
+      console.log("❌ No token provided for", req.url);
       return res
         .status(401)
         .json({ success: false, message: "No token provided" });
@@ -134,16 +143,19 @@ export const hybridAuthMiddleware: RequestHandler = async (req, res, next) => {
 
     const decoded = HybridAuthSystem.verifyToken(token);
     if (!decoded) {
+      console.log("❌ Invalid token for", req.url);
       return res.status(401).json({ success: false, message: "Invalid token" });
     }
 
     const user = await HybridAuthSystem.findUserById(decoded.userId);
     if (!user) {
+      console.log("❌ User not found for", req.url, "userId:", decoded.userId);
       return res
         .status(404)
         .json({ success: false, message: "User not found" });
     }
 
+    console.log("✅ Authentication successful for", req.url, "user:", user.email);
     // Add user to request object
     (req as any).user = user;
     next();
