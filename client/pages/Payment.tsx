@@ -467,7 +467,12 @@ export default function Payment() {
         throw new Error(errorMessage);
       }
 
-      bookingResult = await bookingResponse.json();
+      try {
+        bookingResult = await bookingResponse.json();
+      } catch (parseError) {
+        console.error("Failed to parse success response:", parseError);
+        throw new Error("Failed to parse booking response");
+      }
       console.log("Booking created successfully:", bookingResult);
 
       if (!bookingResult.success || !bookingResult.booking) {
@@ -496,8 +501,10 @@ export default function Payment() {
 
         try {
           const errorData = await paypalOrderResponse.json();
-          errorMessage = errorData.message || errorMessage;
-        } catch {
+          errorMessage = errorData.message || errorData.error || errorMessage;
+          console.error("PayPal order creation failed:", errorData);
+        } catch (parseError) {
+          console.error("Failed to parse PayPal error response:", parseError);
           // If JSON parsing fails, use the default error message
         }
 
@@ -509,7 +516,12 @@ export default function Payment() {
         throw new Error(errorMessage);
       }
 
-      paypalOrderData = await paypalOrderResponse.json();
+      try {
+        paypalOrderData = await paypalOrderResponse.json();
+      } catch (parseError) {
+        console.error("Failed to parse PayPal success response:", parseError);
+        throw new Error("Failed to parse PayPal response");
+      }
       console.log("PayPal order created:", paypalOrderData);
 
       const { orderID, approvalUrl, demoMode, message } = paypalOrderData;
