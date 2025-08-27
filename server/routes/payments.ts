@@ -717,8 +717,8 @@ export const handleCapturePayPalPayment: RequestHandler = async (req, res) => {
       });
     }
 
-    // Handle mock orders for development
-    if (orderId.startsWith("mock_order_") || payerId === "mock_payer") {
+    // Handle demo/mock orders for development - check this FIRST before trying to get access token
+    if (orderId.startsWith("demo_order_") || orderId.startsWith("mock_order_") || payerId === "demo_payer" || payerId === "mock_payer") {
       console.log("✅ PayPal demo mode - returning mock capture response");
       return res.json({
         success: true,
