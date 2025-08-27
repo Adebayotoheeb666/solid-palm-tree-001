@@ -32,6 +32,20 @@ export default defineConfig({
         // External dependencies that should not be bundled
         "express",
         "cors",
+        // Supabase dependencies
+        "@supabase/supabase-js",
+        "@supabase/postgrest-js",
+        "@supabase/realtime-js",
+        "@supabase/storage-js",
+        "@supabase/functions-js",
+        // Other runtime dependencies
+        "amadeus",
+        "stripe",
+        "@sendgrid/mail",
+        "dotenv",
+        "pdfkit",
+        "qrcode",
+        "zod",
       ],
       output: {
         format: "es",
@@ -40,6 +54,7 @@ export default defineConfig({
     },
     minify: false, // Keep readable for debugging
     sourcemap: true,
+    emptyOutDir: true,
   },
   resolve: {
     alias: {
@@ -49,5 +64,7 @@ export default defineConfig({
   },
   define: {
     "process.env.NODE_ENV": '"production"',
+    // Prevent runtime execution during build
+    "process.env.BUILD_MODE": '"true"',
   },
 });
