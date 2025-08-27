@@ -318,11 +318,24 @@ export default function Payment() {
         totalAmount: calculateTotal(),
       };
 
+      const token = localStorage.getItem("authToken");
+      const isAuthenticated = !!token && !!user;
+
       console.log("Creating booking for Stripe payment:", bookingRequest);
-      const bookingResponse = await authenticatedFetch("/api/bookings", {
-        method: "POST",
-        body: JSON.stringify(bookingRequest),
-      });
+      console.log("Using API:", isAuthenticated ? "/api/bookings" : "/api/guest/bookings");
+
+      const bookingResponse = isAuthenticated
+        ? await authenticatedFetch("/api/bookings", {
+            method: "POST",
+            body: JSON.stringify(bookingRequest),
+          })
+        : await fetch("/api/guest/bookings", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(bookingRequest),
+          });
 
       let bookingResult;
 
@@ -658,10 +671,24 @@ export default function Payment() {
         totalAmount: calculateTotal(),
       };
 
-      const bookingResponse = await authenticatedFetch("/api/bookings", {
-        method: "POST",
-        body: JSON.stringify(bookingRequest),
-      });
+      const token = localStorage.getItem("authToken");
+      const isAuthenticated = !!token && !!user;
+
+      console.log("Creating booking for card payment");
+      console.log("Using API:", isAuthenticated ? "/api/bookings" : "/api/guest/bookings");
+
+      const bookingResponse = isAuthenticated
+        ? await authenticatedFetch("/api/bookings", {
+            method: "POST",
+            body: JSON.stringify(bookingRequest),
+          })
+        : await fetch("/api/guest/bookings", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(bookingRequest),
+          });
 
       if (!bookingResponse.ok) {
         throw new Error("Failed to create booking");
