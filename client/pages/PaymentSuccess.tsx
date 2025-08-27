@@ -62,9 +62,16 @@ export default function PaymentSuccess() {
 
         if (!captureResponse.ok) {
           let errorMessage = `Failed to capture PayPal payment: ${captureResponse.status}`;
+
+          // Clone the response to avoid "body stream already read" error
+          const responseClone = captureResponse.clone();
           try {
-            const errorData = await captureResponse.json();
-            errorMessage = errorData.message || errorData.error || errorMessage;
+            const errorData = await responseClone.json();
+            if (typeof errorData === 'string') {
+              errorMessage = errorData;
+            } else if (errorData && typeof errorData === 'object') {
+              errorMessage = errorData.message || errorData.error || errorData.details || JSON.stringify(errorData);
+            }
             console.error("PayPal capture failed:", errorData);
           } catch (parseError) {
             console.error("Failed to parse capture error:", parseError);
