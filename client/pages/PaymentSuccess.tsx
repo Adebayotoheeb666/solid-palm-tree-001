@@ -58,6 +58,8 @@ export default function PaymentSuccess() {
           ok: captureResponse.ok
         });
 
+        let captureResult;
+
         if (!captureResponse.ok) {
           let errorMessage = `Failed to capture PayPal payment: ${captureResponse.status}`;
           try {
@@ -66,11 +68,17 @@ export default function PaymentSuccess() {
             console.error("PayPal capture failed:", errorData);
           } catch (parseError) {
             console.error("Failed to parse capture error:", parseError);
+            // Use default error message if parsing fails
           }
           throw new Error(errorMessage);
         }
 
-        const captureResult = await captureResponse.json();
+        try {
+          captureResult = await captureResponse.json();
+        } catch (parseError) {
+          console.error("Failed to parse capture success response:", parseError);
+          throw new Error("Failed to parse PayPal capture response");
+        }
 
         if (captureResult.success) {
           // For guest users, PayPal capture completion means payment is done
