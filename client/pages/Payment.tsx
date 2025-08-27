@@ -561,7 +561,14 @@ export default function Payment() {
 
         try {
           const errorData = await paypalOrderResponse.json();
-          errorMessage = errorData.message || errorData.error || errorMessage;
+
+          // Improved error message extraction
+          if (typeof errorData === 'string') {
+            errorMessage = errorData;
+          } else if (errorData && typeof errorData === 'object') {
+            errorMessage = errorData.message || errorData.error || errorData.details || JSON.stringify(errorData);
+          }
+
           console.error("PayPal order creation failed:", errorData);
         } catch (parseError) {
           console.error("Failed to parse PayPal error response:", parseError);
