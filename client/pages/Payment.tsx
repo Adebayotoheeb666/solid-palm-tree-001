@@ -318,11 +318,27 @@ export default function Payment() {
         totalAmount: calculateTotal(),
       };
 
+      const token = localStorage.getItem("authToken");
+      const isAuthenticated = !!token && !!user;
+
       console.log("Creating booking for Stripe payment:", bookingRequest);
-      const bookingResponse = await authenticatedFetch("/api/bookings", {
-        method: "POST",
-        body: JSON.stringify(bookingRequest),
-      });
+      console.log(
+        "Using API:",
+        isAuthenticated ? "/api/bookings" : "/api/guest/bookings",
+      );
+
+      const bookingResponse = isAuthenticated
+        ? await authenticatedFetch("/api/bookings", {
+            method: "POST",
+            body: JSON.stringify(bookingRequest),
+          })
+        : await fetch("/api/guest/bookings", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(bookingRequest),
+          });
 
       let bookingResult;
 
@@ -331,13 +347,16 @@ export default function Payment() {
 
         try {
           const errorData = await bookingResponse.json();
-          errorMessage = errorData.message || errorMessage;
-        } catch {
+          errorMessage = errorData.message || errorData.error || errorMessage;
+          console.error("Booking creation failed:", errorData);
+        } catch (parseError) {
+          console.error("Failed to parse error response:", parseError);
           // If JSON parsing fails, use the default error message
         }
 
         console.error("Booking creation failed:", {
           status: bookingResponse.status,
+          statusText: bookingResponse.statusText,
           url: "/api/bookings",
         });
 
@@ -354,7 +373,17 @@ export default function Payment() {
       setBookingData(bookingResult.booking);
     } catch (err) {
       console.error("Booking creation error:", err);
-      setError(err instanceof Error ? err.message : "Failed to create booking");
+      let errorMessage = "Failed to create booking";
+
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      } else if (typeof err === "string") {
+        errorMessage = err;
+      } else if (err && typeof err === "object" && "message" in err) {
+        errorMessage = (err as any).message || errorMessage;
+      }
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -396,6 +425,8 @@ export default function Payment() {
         );
       }
 
+      // Note: PayPal payment supports guest checkout - authentication is optional
+
       // Transform route data to match booking API expectations
       const transformedRoute = {
         from: {
@@ -432,11 +463,29 @@ export default function Payment() {
         totalAmount: calculateTotal(),
       };
 
-      console.log("Sending booking request to /api/bookings...");
-      const bookingResponse = await authenticatedFetch("/api/bookings", {
-        method: "POST",
-        body: JSON.stringify(bookingRequest),
-      });
+      const token = localStorage.getItem("authToken");
+      const isAuthenticated = !!token && !!user;
+
+      console.log("Sending booking request...");
+      console.log("Auth token:", token ? "Present" : "Missing");
+      console.log("User context:", user ? "Logged in" : "Guest");
+      console.log(
+        "Using API:",
+        isAuthenticated ? "/api/bookings" : "/api/guest/bookings",
+      );
+
+      const bookingResponse = isAuthenticated
+        ? await authenticatedFetch("/api/bookings", {
+            method: "POST",
+            body: JSON.stringify(bookingRequest),
+          })
+        : await fetch("/api/guest/bookings", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(bookingRequest),
+          });
 
       console.log("Booking response status:", bookingResponse.status);
 
@@ -447,9 +496,24 @@ export default function Payment() {
 
         try {
           const errorData = await bookingResponse.json();
-          errorMessage = errorData.message || errorMessage;
-        } catch {
-          // If JSON parsing fails, use the default error message
+          errorMessage = errorData.message || errorData.error || errorMessage;
+          console.error("Booking creation failed:", errorData);
+
+          // Special handling for authentication errors
+          if (bookingResponse.status === 401) {
+            errorMessage =
+              "Authentication failed. Please log in again and try again.";
+            // Clear invalid token
+            localStorage.removeItem("authToken");
+          }
+        } catch (parseError) {
+          console.error("Failed to parse error response:", parseError);
+          // For 401 errors, provide a helpful message even if we can't parse the response
+          if (bookingResponse.status === 401) {
+            errorMessage =
+              "Authentication failed. Please log in again and try again.";
+            localStorage.removeItem("authToken");
+          }
         }
 
         console.error("Booking creation failed:", {
@@ -462,7 +526,12 @@ export default function Payment() {
         throw new Error(errorMessage);
       }
 
-      bookingResult = await bookingResponse.json();
+      try {
+        bookingResult = await bookingResponse.json();
+      } catch (parseError) {
+        console.error("Failed to parse success response:", parseError);
+        throw new Error("Failed to parse booking response");
+      }
       console.log("Booking created successfully:", bookingResult);
 
       if (!bookingResult.success || !bookingResult.booking) {
@@ -471,18 +540,27 @@ export default function Payment() {
 
       const booking = bookingResult.booking;
 
-      // Create PayPal order
-      const paypalOrderResponse = await authenticatedFetch(
-        "/api/payments/paypal/create-order",
-        {
-          method: "POST",
-          body: JSON.stringify({
-            bookingId: booking.id,
-            amount: calculateTotal(),
-            currency: "USD",
-          }),
-        },
-      );
+      // Create PayPal order (supports both authenticated and guest users)
+      const paypalOrderResponse = isAuthenticated
+        ? await authenticatedFetch("/api/payments/paypal/create-order", {
+            method: "POST",
+            body: JSON.stringify({
+              bookingId: booking.id,
+              amount: calculateTotal(),
+              currency: "USD",
+            }),
+          })
+        : await fetch("/api/payments/paypal/create-order", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              bookingId: booking.id,
+              amount: calculateTotal(),
+              currency: "USD",
+            }),
+          });
 
       let paypalOrderData;
 
@@ -491,8 +569,21 @@ export default function Payment() {
 
         try {
           const errorData = await paypalOrderResponse.json();
-          errorMessage = errorData.message || errorMessage;
-        } catch {
+
+          // Improved error message extraction
+          if (typeof errorData === "string") {
+            errorMessage = errorData;
+          } else if (errorData && typeof errorData === "object") {
+            errorMessage =
+              errorData.message ||
+              errorData.error ||
+              errorData.details ||
+              JSON.stringify(errorData);
+          }
+
+          console.error("PayPal order creation failed:", errorData);
+        } catch (parseError) {
+          console.error("Failed to parse PayPal error response:", parseError);
           // If JSON parsing fails, use the default error message
         }
 
@@ -504,7 +595,12 @@ export default function Payment() {
         throw new Error(errorMessage);
       }
 
-      paypalOrderData = await paypalOrderResponse.json();
+      try {
+        paypalOrderData = await paypalOrderResponse.json();
+      } catch (parseError) {
+        console.error("Failed to parse PayPal success response:", parseError);
+        throw new Error("Failed to parse PayPal response");
+      }
       console.log("PayPal order created:", paypalOrderData);
 
       const { orderID, approvalUrl, demoMode, message } = paypalOrderData;
@@ -528,11 +624,18 @@ export default function Payment() {
       }
     } catch (err) {
       console.error("PayPal payment error:", err);
-      setError(
-        err instanceof Error
-          ? err.message
-          : "An error occurred while processing PayPal payment. Please try again.",
-      );
+      let errorMessage =
+        "An error occurred while processing PayPal payment. Please try again.";
+
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      } else if (typeof err === "string") {
+        errorMessage = err;
+      } else if (err && typeof err === "object" && "message" in err) {
+        errorMessage = (err as any).message;
+      }
+
+      setError(errorMessage);
     } finally {
       setPaypalLoading(false);
     }
@@ -597,10 +700,27 @@ export default function Payment() {
         totalAmount: calculateTotal(),
       };
 
-      const bookingResponse = await authenticatedFetch("/api/bookings", {
-        method: "POST",
-        body: JSON.stringify(bookingRequest),
-      });
+      const token = localStorage.getItem("authToken");
+      const isAuthenticated = !!token && !!user;
+
+      console.log("Creating booking for card payment");
+      console.log(
+        "Using API:",
+        isAuthenticated ? "/api/bookings" : "/api/guest/bookings",
+      );
+
+      const bookingResponse = isAuthenticated
+        ? await authenticatedFetch("/api/bookings", {
+            method: "POST",
+            body: JSON.stringify(bookingRequest),
+          })
+        : await fetch("/api/guest/bookings", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(bookingRequest),
+          });
 
       if (!bookingResponse.ok) {
         throw new Error("Failed to create booking");

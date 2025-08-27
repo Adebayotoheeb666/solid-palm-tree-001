@@ -189,16 +189,31 @@ export const useAuthenticatedFetch = () => {
   const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
     const token = localStorage.getItem("authToken");
 
+    console.log("🔍 AuthenticatedFetch Debug:", {
+      url,
+      hasToken: !!token,
+      tokenPrefix: token ? token.substring(0, 10) + "..." : "none",
+    });
+
     const headers = {
       "Content-Type": "application/json",
       ...(token && { Authorization: `Bearer ${token}` }),
       ...options.headers,
     };
 
-    return fetch(url, {
+    const response = await fetch(url, {
       ...options,
       headers,
     });
+
+    console.log("🔍 Response Debug:", {
+      url,
+      status: response.status,
+      statusText: response.statusText,
+      ok: response.ok,
+    });
+
+    return response;
   };
 
   return authenticatedFetch;

@@ -273,14 +273,11 @@ export async function createServer() {
   console.log("  useSupabase:", useSupabase);
   console.log("  Auth routes: Using", useSupabase ? "Supabase" : "fallback");
 
-  // Choose auth middleware based on configuration
-  const authMiddleware = useSupabase
-    ? supabaseAuthMiddleware
-    : hybridAuthMiddleware;
+  // Use hybrid auth middleware to support both Supabase and fallback authentication
+  const authMiddleware = hybridAuthMiddleware;
 
   console.log(
-    "📋 Setting up auth middleware:",
-    useSupabase ? "Supabase" : "Hybrid",
+    "📋 Setting up auth middleware: Hybrid (supports both Supabase and fallback)",
   );
 
   // Initialize database if using Supabase (only at runtime, not during build)
@@ -325,40 +322,20 @@ export async function createServer() {
   app.post("/api/guest/bookings", handleCreateGuestBooking);
   app.get("/api/guest/bookings/:pnr", handleGetGuestBooking);
 
-  // Booking routes (authenticated) - prefer Supabase but fallback when needed
-  app.post(
-    "/api/bookings",
-    authMiddleware,
-    useSupabase ? handleCreateSupabaseBooking : handleCreateBooking,
-  );
-  app.get(
-    "/api/bookings",
-    authMiddleware,
-    useSupabase ? handleGetSupabaseUserBookings : handleGetUserBookings,
-  );
-  app.get(
-    "/api/bookings/:bookingId",
-    authMiddleware,
-    useSupabase ? handleGetSupabaseBooking : handleGetBookingDetails,
-  );
+  // Booking routes (authenticated) - use hybrid auth system for consistency
+  app.post("/api/bookings", authMiddleware, handleCreateBooking);
+  app.get("/api/bookings", authMiddleware, handleGetUserBookings);
+  app.get("/api/bookings/:bookingId", authMiddleware, handleGetBookingDetails);
   app.put(
     "/api/bookings/:bookingId/cancel",
     authMiddleware,
-    useSupabase ? handleCancelSupabaseBooking : handleCancelBooking,
+    handleCancelBooking,
   );
 
   // Payment routes (authenticated)
   app.post("/api/payments", authMiddleware, handleProcessPayment);
-  app.post(
-    "/api/payments/paypal/create-order",
-    authMiddleware,
-    handleCreatePayPalOrder,
-  );
-  app.post(
-    "/api/payments/paypal/capture",
-    authMiddleware,
-    handleCapturePayPalPayment,
-  );
+  app.post("/api/payments/paypal/create-order", handleCreatePayPalOrder);
+  app.post("/api/payments/paypal/capture", handleCapturePayPalPayment);
   app.post(
     "/api/payments/stripe/create-intent",
     authMiddleware,
@@ -429,15 +406,11 @@ export async function createServer() {
     authMiddleware,
     handleUpdateUserStatus,
   );
-  app.get(
-    "/api/admin/bookings",
-    authMiddleware,
-    useSupabase ? handleGetAllSupabaseBookings : handleGetAllBookings,
-  );
+  app.get("/api/admin/bookings", authMiddleware, handleGetAllBookings);
   app.put(
     "/api/admin/bookings/:bookingId/status",
     authMiddleware,
-    useSupabase ? handleUpdateSupabaseBookingStatus : handleUpdateBookingStatus,
+    handleUpdateBookingStatus,
   );
   app.get(
     "/api/admin/support/tickets",
