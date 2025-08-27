@@ -4,7 +4,14 @@ export default function ThankYou(props) {
   const navigate = useNavigate();
 
   const handleBookAgain = () => {
-    window.location.reload(); // Reset the app
+    // Clear any stored booking data and navigate to start of booking flow
+    localStorage.removeItem('selectedRoute');
+    localStorage.removeItem('passengerData');
+    localStorage.removeItem('currentBooking');
+    localStorage.removeItem('selectedFlight');
+
+    // Navigate to the route selection page to start new booking
+    navigate('/userform/route');
   };
 
   return (
