@@ -532,18 +532,27 @@ export default function Payment() {
 
       const booking = bookingResult.booking;
 
-      // Create PayPal order
-      const paypalOrderResponse = await authenticatedFetch(
-        "/api/payments/paypal/create-order",
-        {
-          method: "POST",
-          body: JSON.stringify({
-            bookingId: booking.id,
-            amount: calculateTotal(),
-            currency: "USD",
-          }),
-        },
-      );
+      // Create PayPal order (supports both authenticated and guest users)
+      const paypalOrderResponse = isAuthenticated
+        ? await authenticatedFetch("/api/payments/paypal/create-order", {
+            method: "POST",
+            body: JSON.stringify({
+              bookingId: booking.id,
+              amount: calculateTotal(),
+              currency: "USD",
+            }),
+          })
+        : await fetch("/api/payments/paypal/create-order", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              bookingId: booking.id,
+              amount: calculateTotal(),
+              currency: "USD",
+            }),
+          });
 
       let paypalOrderData;
 
