@@ -478,8 +478,11 @@ const PORT = process.env.PORT || 3000;
 const isViteMode =
   process.env.VITE_MODE || process.env.NODE_ENV === "development";
 
-// Only start standalone server if not running via Vite dev server
-if (!isViteMode) {
+// Prevent server startup during build process
+const isBuildMode = process.env.NODE_ENV === "production" && !process.env.PORT;
+
+// Only start standalone server if not running via Vite dev server and not in build mode
+if (!isViteMode && !isBuildMode) {
   createServer().then((app) => {
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
