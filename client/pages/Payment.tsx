@@ -446,6 +446,9 @@ export default function Payment() {
       };
 
       console.log("Sending booking request to /api/bookings...");
+      console.log("Auth token:", localStorage.getItem("authToken") ? "Present" : "Missing");
+      console.log("User context:", user ? "Logged in" : "Guest");
+
       const bookingResponse = await authenticatedFetch("/api/bookings", {
         method: "POST",
         body: JSON.stringify(bookingRequest),
