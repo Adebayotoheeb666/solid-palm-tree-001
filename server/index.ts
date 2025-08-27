@@ -273,10 +273,8 @@ export async function createServer() {
   console.log("  useSupabase:", useSupabase);
   console.log("  Auth routes: Using", useSupabase ? "Supabase" : "fallback");
 
-  // Choose auth middleware based on configuration
-  const authMiddleware = useSupabase
-    ? supabaseAuthMiddleware
-    : hybridAuthMiddleware;
+  // Use hybrid auth middleware to support both Supabase and fallback authentication
+  const authMiddleware = hybridAuthMiddleware;
 
   console.log(
     "📋 Setting up auth middleware:",
@@ -325,27 +323,11 @@ export async function createServer() {
   app.post("/api/guest/bookings", handleCreateGuestBooking);
   app.get("/api/guest/bookings/:pnr", handleGetGuestBooking);
 
-  // Booking routes (authenticated) - prefer Supabase but fallback when needed
-  app.post(
-    "/api/bookings",
-    authMiddleware,
-    useSupabase ? handleCreateSupabaseBooking : handleCreateBooking,
-  );
-  app.get(
-    "/api/bookings",
-    authMiddleware,
-    useSupabase ? handleGetSupabaseUserBookings : handleGetUserBookings,
-  );
-  app.get(
-    "/api/bookings/:bookingId",
-    authMiddleware,
-    useSupabase ? handleGetSupabaseBooking : handleGetBookingDetails,
-  );
-  app.put(
-    "/api/bookings/:bookingId/cancel",
-    authMiddleware,
-    useSupabase ? handleCancelSupabaseBooking : handleCancelBooking,
-  );
+  // Booking routes (authenticated) - use hybrid auth system for consistency
+  app.post("/api/bookings", authMiddleware, handleCreateBooking);
+  app.get("/api/bookings", authMiddleware, handleGetUserBookings);
+  app.get("/api/bookings/:bookingId", authMiddleware, handleGetBookingDetails);
+  app.put("/api/bookings/:bookingId/cancel", authMiddleware, handleCancelBooking);
 
   // Payment routes (authenticated)
   app.post("/api/payments", authMiddleware, handleProcessPayment);

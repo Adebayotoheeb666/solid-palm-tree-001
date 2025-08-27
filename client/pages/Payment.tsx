@@ -331,13 +331,16 @@ export default function Payment() {
 
         try {
           const errorData = await bookingResponse.json();
-          errorMessage = errorData.message || errorMessage;
-        } catch {
+          errorMessage = errorData.message || errorData.error || errorMessage;
+          console.error("Booking creation failed:", errorData);
+        } catch (parseError) {
+          console.error("Failed to parse error response:", parseError);
           // If JSON parsing fails, use the default error message
         }
 
         console.error("Booking creation failed:", {
           status: bookingResponse.status,
+          statusText: bookingResponse.statusText,
           url: "/api/bookings",
         });
 
@@ -447,8 +450,10 @@ export default function Payment() {
 
         try {
           const errorData = await bookingResponse.json();
-          errorMessage = errorData.message || errorMessage;
-        } catch {
+          errorMessage = errorData.message || errorData.error || errorMessage;
+          console.error("Booking creation failed:", errorData);
+        } catch (parseError) {
+          console.error("Failed to parse error response:", parseError);
           // If JSON parsing fails, use the default error message
         }
 
@@ -528,11 +533,17 @@ export default function Payment() {
       }
     } catch (err) {
       console.error("PayPal payment error:", err);
-      setError(
-        err instanceof Error
-          ? err.message
-          : "An error occurred while processing PayPal payment. Please try again.",
-      );
+      let errorMessage = "An error occurred while processing PayPal payment. Please try again.";
+
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      } else if (typeof err === 'string') {
+        errorMessage = err;
+      } else if (err && typeof err === 'object' && 'message' in err) {
+        errorMessage = (err as any).message;
+      }
+
+      setError(errorMessage);
     } finally {
       setPaypalLoading(false);
     }
