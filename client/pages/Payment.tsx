@@ -409,6 +409,14 @@ export default function Payment() {
         );
       }
 
+      // Check if user is authenticated (for PayPal, authentication is required)
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        throw new Error(
+          "Authentication required. Please log in to continue with PayPal payment.",
+        );
+      }
+
       // Transform route data to match booking API expectations
       const transformedRoute = {
         from: {
