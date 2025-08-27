@@ -476,15 +476,16 @@ export async function createServer() {
   return app;
 }
 
-// Start the server only in production or when not running via Vite
+// Start the server only in development mode when not running via Vite
+// In production, node-build.ts is the entry point
 const PORT = process.env.PORT || 3000;
 const isViteMode =
   process.env.VITE_MODE || process.env.NODE_ENV === "development";
 
-// Prevent server startup during build process
-const isBuildMode = process.env.NODE_ENV === "production" && !process.env.PORT;
+// Prevent server startup during build process or in production (node-build.ts handles production)
+const isBuildMode = process.env.NODE_ENV === "production";
 
-// Only start standalone server if not running via Vite dev server and not in build mode
+// Only start standalone server if not running via Vite dev server and not in production/build mode
 if (!isViteMode && !isBuildMode) {
   createServer().then((app) => {
     app.listen(PORT, () => {

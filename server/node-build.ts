@@ -2,8 +2,7 @@ import path from "path";
 import { createServer } from "./index";
 import * as express from "express";
 
-const port =
-  process.env.PORT || (process.env.NODE_ENV === "production" ? 8080 : 3000);
+const port = process.env.PORT || 10000;
 
 // Initialize server asynchronously
 async function initializeServer() {
