@@ -357,7 +357,17 @@ export default function Payment() {
       setBookingData(bookingResult.booking);
     } catch (err) {
       console.error("Booking creation error:", err);
-      setError(err instanceof Error ? err.message : "Failed to create booking");
+      let errorMessage = "Failed to create booking";
+
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      } else if (typeof err === 'string') {
+        errorMessage = err;
+      } else if (err && typeof err === 'object' && 'message' in err) {
+        errorMessage = (err as any).message || errorMessage;
+      }
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

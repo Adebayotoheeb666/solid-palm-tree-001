@@ -277,8 +277,7 @@ export async function createServer() {
   const authMiddleware = hybridAuthMiddleware;
 
   console.log(
-    "📋 Setting up auth middleware:",
-    useSupabase ? "Supabase" : "Hybrid",
+    "📋 Setting up auth middleware: Hybrid (supports both Supabase and fallback)",
   );
 
   // Initialize database if using Supabase (only at runtime, not during build)
