@@ -28,49 +28,68 @@ export default function PaymentSuccess() {
       }
 
       try {
-        // Capture the PayPal payment
-        const captureResponse = await authenticatedFetch('/api/payments/paypal/capture', {
-          method: 'POST',
-          body: JSON.stringify({ orderId, payerId }),
+        // Check if user is authenticated
+        const token = localStorage.getItem("authToken");
+        const isAuthenticated = !!token && !!user;
+
+        console.log("🔍 PayPal Capture Debug:", {
+          orderId,
+          payerId,
+          isAuthenticated,
+          hasUser: !!user
+        });
+
+        // Capture the PayPal payment (supports both authenticated and guest users)
+        const captureResponse = isAuthenticated
+          ? await authenticatedFetch('/api/payments/paypal/capture', {
+              method: 'POST',
+              body: JSON.stringify({ orderId, payerId }),
+            })
+          : await fetch('/api/payments/paypal/capture', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ orderId, payerId }),
+            });
+
+        console.log("🔍 Capture Response:", {
+          status: captureResponse.status,
+          ok: captureResponse.ok
         });
 
         if (!captureResponse.ok) {
-          throw new Error('Failed to capture PayPal payment');
+          let errorMessage = `Failed to capture PayPal payment: ${captureResponse.status}`;
+          try {
+            const errorData = await captureResponse.json();
+            errorMessage = errorData.message || errorData.error || errorMessage;
+            console.error("PayPal capture failed:", errorData);
+          } catch (parseError) {
+            console.error("Failed to parse capture error:", parseError);
+          }
+          throw new Error(errorMessage);
         }
 
         const captureResult = await captureResponse.json();
 
         if (captureResult.success) {
-          // Process the payment in our system
-          const paymentResponse = await authenticatedFetch('/api/payments', {
-            method: 'POST',
-            body: JSON.stringify({
-              bookingId: searchParams.get('bookingId') || 'unknown',
-              paymentMethod: 'paypal',
-              paymentDetails: {
-                paypalOrderId: orderId,
-                paypalPayerId: payerId
-              }
-            }),
-          });
+          // For guest users, PayPal capture completion means payment is done
+          // For authenticated users, we could also process the payment in our system
+          setPaymentComplete(true);
+          showSuccess("Payment successful!", "Your booking has been confirmed");
 
-          if (paymentResponse.ok) {
-            setPaymentComplete(true);
-            showSuccess("Payment successful!", "Your booking has been confirmed");
-            
-            // Clear stored data
-            localStorage.removeItem('selectedRoute');
-            localStorage.removeItem('passengerData');
-            
-            // Redirect after short delay
-            setTimeout(() => {
-              navigate('/userform/thankyou');
-            }, 3000);
-          } else {
-            throw new Error('Failed to process payment in our system');
-          }
+          // Clear stored data
+          localStorage.removeItem('selectedRoute');
+          localStorage.removeItem('passengerData');
+          localStorage.removeItem('currentBooking');
+          localStorage.removeItem('selectedFlight');
+
+          // Redirect after short delay
+          setTimeout(() => {
+            navigate('/userform/thankyou');
+          }, 3000);
         } else {
-          throw new Error('PayPal payment capture failed');
+          throw new Error(captureResult.message || 'PayPal payment capture failed');
         }
       } catch (err) {
         console.error('Payment capture error:', err);
