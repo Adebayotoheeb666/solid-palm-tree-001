@@ -1,7 +1,6 @@
 import path from "path";
 import { createServer } from "./index";
 import * as express from "express";
-import { logSupabaseConnection } from "./logSupabaseConnection";
 
 const port =
   process.env.PORT || (process.env.NODE_ENV === "production" ? 8080 : 3000);
@@ -31,16 +30,23 @@ async function initializeServer() {
     console.log(`🚀 Fusion Starter server running on port ${port}`);
     console.log(`📱 Frontend: http://localhost:${port}`);
     console.log(`🔧 API: http://localhost:${port}/api`);
-    // Log Supabase connection status on server start
-    logSupabaseConnection();
+    // Log Supabase connection status on server start (only at runtime)
+    if (process.env.NODE_ENV === "production" && process.env.PORT) {
+      import("./logSupabaseConnection").then(({ logSupabaseConnection }) => {
+        logSupabaseConnection();
+      });
+    }
   });
 }
 
-// Start the server
-initializeServer().catch((err) => {
-  console.error("Failed to initialize server:", err);
-  process.exit(1);
-});
+// Only start the server if we're not in build mode
+if (process.env.NODE_ENV !== "production" || process.env.PORT) {
+  // Start the server
+  initializeServer().catch((err) => {
+    console.error("Failed to initialize server:", err);
+    process.exit(1);
+  });
+}
 
 // Graceful shutdown
 process.on("SIGTERM", () => {
