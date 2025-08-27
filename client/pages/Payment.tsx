@@ -465,9 +465,20 @@ export default function Payment() {
           const errorData = await bookingResponse.json();
           errorMessage = errorData.message || errorData.error || errorMessage;
           console.error("Booking creation failed:", errorData);
+
+          // Special handling for authentication errors
+          if (bookingResponse.status === 401) {
+            errorMessage = "Authentication failed. Please log in again and try again.";
+            // Clear invalid token
+            localStorage.removeItem("authToken");
+          }
         } catch (parseError) {
           console.error("Failed to parse error response:", parseError);
-          // If JSON parsing fails, use the default error message
+          // For 401 errors, provide a helpful message even if we can't parse the response
+          if (bookingResponse.status === 401) {
+            errorMessage = "Authentication failed. Please log in again and try again.";
+            localStorage.removeItem("authToken");
+          }
         }
 
         console.error("Booking creation failed:", {
