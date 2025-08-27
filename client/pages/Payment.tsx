@@ -409,13 +409,7 @@ export default function Payment() {
         );
       }
 
-      // Check if user is authenticated (for PayPal, authentication is required)
-      const token = localStorage.getItem("authToken");
-      if (!token) {
-        throw new Error(
-          "Authentication required. Please log in to continue with PayPal payment.",
-        );
-      }
+      // Note: PayPal payment supports guest checkout - authentication is optional
 
       // Transform route data to match booking API expectations
       const transformedRoute = {
@@ -453,14 +447,26 @@ export default function Payment() {
         totalAmount: calculateTotal(),
       };
 
-      console.log("Sending booking request to /api/bookings...");
-      console.log("Auth token:", localStorage.getItem("authToken") ? "Present" : "Missing");
-      console.log("User context:", user ? "Logged in" : "Guest");
+      const token = localStorage.getItem("authToken");
+      const isAuthenticated = !!token && !!user;
 
-      const bookingResponse = await authenticatedFetch("/api/bookings", {
-        method: "POST",
-        body: JSON.stringify(bookingRequest),
-      });
+      console.log("Sending booking request...");
+      console.log("Auth token:", token ? "Present" : "Missing");
+      console.log("User context:", user ? "Logged in" : "Guest");
+      console.log("Using API:", isAuthenticated ? "/api/bookings" : "/api/guest/bookings");
+
+      const bookingResponse = isAuthenticated
+        ? await authenticatedFetch("/api/bookings", {
+            method: "POST",
+            body: JSON.stringify(bookingRequest),
+          })
+        : await fetch("/api/guest/bookings", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(bookingRequest),
+          });
 
       console.log("Booking response status:", bookingResponse.status);
 
