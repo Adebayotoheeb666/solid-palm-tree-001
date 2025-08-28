@@ -316,7 +316,7 @@ export const handleAmadeusHealthCheck: RequestHandler = async (req, res) => {
     res.json({
       success: true,
       message: "Amadeus service is operational",
-      configured: !!process.env.AMADEUS_API_KEY,
+      configured: !!(process.env.AMADEUS_CLIENT_ID || process.env.AMADEUS_API_KEY),
       environment:
         process.env.NODE_ENV === "production" ? "production" : "test",
       testResult: testResult.length > 0 ? "passed" : "no_results",
@@ -326,7 +326,7 @@ export const handleAmadeusHealthCheck: RequestHandler = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Amadeus service health check failed",
-      configured: !!process.env.AMADEUS_API_KEY,
+      configured: !!(process.env.AMADEUS_CLIENT_ID || process.env.AMADEUS_API_KEY),
       error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
