@@ -3,11 +3,20 @@ import Amadeus from "amadeus";
 // Initialize Amadeus client only if credentials are available
 let amadeus: Amadeus | null = null;
 
-if (process.env.AMADEUS_API_KEY && process.env.AMADEUS_API_SECRET) {
+// Support both naming conventions for env vars
+const AMADEUS_CLIENT_ID =
+  process.env.AMADEUS_CLIENT_ID || process.env.AMADEUS_API_KEY;
+const AMADEUS_CLIENT_SECRET =
+  process.env.AMADEUS_CLIENT_SECRET || process.env.AMADEUS_API_SECRET;
+const AMADEUS_HOSTNAME =
+  process.env.AMADEUS_HOSTNAME ||
+  (process.env.NODE_ENV === "production" ? "production" : "test"); // 'test' for sandbox, 'production' for live
+
+if (AMADEUS_CLIENT_ID && AMADEUS_CLIENT_SECRET) {
   amadeus = new Amadeus({
-    clientId: process.env.AMADEUS_API_KEY,
-    clientSecret: process.env.AMADEUS_API_SECRET,
-    hostname: process.env.NODE_ENV === "production" ? "production" : "test", // 'test' for sandbox, 'production' for live
+    clientId: AMADEUS_CLIENT_ID,
+    clientSecret: AMADEUS_CLIENT_SECRET,
+    hostname: AMADEUS_HOSTNAME,
   });
 }
 
