@@ -5,9 +5,10 @@ import { useAuth } from "../hooks/useAuth";
 
 interface MobileNavProps {
   handleBookNow: () => void;
+  className?: string;
 }
 
-const MobileNav: React.FC<MobileNavProps> = memo(({ handleBookNow }) => {
+const MobileNav: React.FC<MobileNavProps> = memo(({ handleBookNow, className }) => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const { user, logout, isAuthenticated } = useAuth();
@@ -36,7 +37,7 @@ const MobileNav: React.FC<MobileNavProps> = memo(({ handleBookNow }) => {
   const toggleMenu = useCallback(() => setIsOpen((prev) => !prev), []);
 
   return (
-    <div className="md:hidden">
+    <div className={className ?? "md:hidden"}>
       {/* Hamburger Button */}
       <button
         onClick={toggleMenu}
