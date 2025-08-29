@@ -750,8 +750,9 @@ export default function Payment() {
             : {},
       };
 
-      const paymentResponse = await authenticatedFetch("/api/payments", {
+      const paymentResponse = await fetch("/api/payments", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(paymentRequest),
       });
 
