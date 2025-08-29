@@ -55,7 +55,6 @@ export default function StripePaymentForm({
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
               },
               body: JSON.stringify({
                 amount: Math.round(amount * 100),
@@ -102,7 +101,6 @@ export default function StripePaymentForm({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify({
           bookingId,
