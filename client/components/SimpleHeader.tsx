@@ -26,7 +26,7 @@ const SimpleHeader: React.FC<SimpleHeaderProps> = ({
           <img
             src="/onboard/logos.png"
             alt="OnboardTicket Logo"
-            className="h-18 md:h-28 w-auto max-w-[280px] md:max-w-[400px] object-contain cursor-pointer"
+            className="h-36 md:h-56 w-auto max-w-[560px] md:max-w-[800px] object-contain cursor-pointer"
             loading="eager"
           />
         </div>
@@ -87,7 +87,7 @@ const SimpleHeader: React.FC<SimpleHeaderProps> = ({
             <img
               src="/onboard/logos.png"
               alt="OnboardTicket Logo"
-              className="h-12 w-auto object-contain"
+              className="h-24 w-auto object-contain"
             />
             <button
               onClick={closeMenu}

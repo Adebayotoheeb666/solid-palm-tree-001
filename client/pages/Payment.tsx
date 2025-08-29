@@ -796,7 +796,7 @@ export default function Payment() {
           <img
             src="/onboard/result.png"
             alt="OnboardTicket Logo"
-            className="h-8 sm:h-10 lg:h-12 w-auto max-w-[150px] sm:max-w-[200px] lg:max-w-[250px] cursor-pointer"
+            className="h-16 sm:h-20 lg:h-24 w-auto max-w-[300px] sm:max-w-[400px] lg:max-w-[500px] cursor-pointer"
             loading="eager"
             onClick={() => navigate("/")}
           />
@@ -827,7 +827,7 @@ export default function Payment() {
                     </div>
                   </div>
                 )}
-                <div className="flex items-center gap-8">
+                <div className="grid grid-cols-[auto,1fr] gap-x-8 gap-y-2 items-baseline">
                   <span className="text-lg lg:text-xl font-bold">
                     Base Price:
                   </span>
@@ -835,30 +835,31 @@ export default function Payment() {
                     {getCurrency()}
                     {getBasePrice().toFixed(2)}
                   </span>
-                </div>
-                <div className="flex items-center gap-8">
+
                   <span className="text-lg lg:text-xl font-bold">
                     Passengers:
                   </span>
                   <span className="text-xl lg:text-2xl font-bold">
                     {passengerData?.passengers?.length || 1}
                   </span>
-                </div>
-                <div className="flex items-center gap-8">
+
                   <span className="text-lg lg:text-xl font-bold">TOTAL:</span>
                   <span className="text-xl lg:text-2xl font-bold">
                     {getCurrency()}
                     {calculateTotal().toFixed(2)}
                   </span>
+
+                  {routeData && (
+                    <>
+                      <span className="text-lg lg:text-xl font-bold">
+                        Route:
+                      </span>
+                      <span className="text-xl lg:text-2xl font-bold">
+                        {routeData.from?.city} → {routeData.to?.city}
+                      </span>
+                    </>
+                  )}
                 </div>
-                {routeData && (
-                  <div className="flex items-center gap-8">
-                    <span className="text-lg lg:text-xl font-bold">Route:</span>
-                    <span className="text-xl lg:text-2xl font-bold">
-                      {routeData.from?.city} → {routeData.to?.city}
-                    </span>
-                  </div>
-                )}
               </div>
 
               {/* Security Badge */}
@@ -1296,7 +1297,7 @@ export default function Payment() {
                 <img
                   src="/onboard/result.png"
                   alt="OnboardTicket Logo"
-                  className="h-12 sm:h-14 md:h-16 w-auto max-w-[200px] sm:max-w-[240px] md:max-w-[280px] object-contain mb-4 cursor-pointer"
+                  className="h-24 sm:h-28 md:h-32 w-auto max-w-[400px] sm:max-w-[480px] md:max-w-[560px] object-contain mb-4 cursor-pointer"
                   onClick={() => navigate("/")}
                 />
                 <hr className="border-white mb-4" />

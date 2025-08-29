@@ -67,7 +67,7 @@ const MobileNav: React.FC<MobileNavProps> = memo(({ handleBookNow }) => {
             <img
               src="/onboard/logos.png"
               alt="OnboardTicket Logo"
-              className="h-12 w-auto object-contain"
+              className="h-24 w-auto object-contain"
             />
             <button
               onClick={closeMenu}

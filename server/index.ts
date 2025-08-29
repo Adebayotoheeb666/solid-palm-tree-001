@@ -379,6 +379,10 @@ export async function createServer() {
   app.post("/api/email/welcome", authMiddleware, handleSendWelcomeEmail);
   app.post("/api/email/test", authMiddleware, handleTestEmail);
 
+  // Public contact route
+  const { handleContactSubmit } = await import("./routes/contact");
+  app.post("/api/contact", handleContactSubmit);
+
   // Email verification routes (public)
   app.post("/api/email/verify/send", handleSendVerificationEmail);
   app.post("/api/email/verify/confirm", handleVerifyEmail);

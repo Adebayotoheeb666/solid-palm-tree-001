@@ -329,7 +329,7 @@ export default function TermsConditions() {
                 <img
                   src="/onboard/result.png"
                   alt="OnboardTicket Logo"
-                  className="h-12 sm:h-14 md:h-16 w-auto max-w-[200px] sm:max-w-[240px] md:max-w-[280px] object-contain mb-4 cursor-pointer"
+                  className="h-24 sm:h-28 md:h-32 w-auto max-w-[400px] sm:max-w-[480px] md:max-w-[560px] object-contain mb-4 cursor-pointer"
                   onClick={() => navigate("/")}
                 />
                 <hr className="border-white mb-4" />
