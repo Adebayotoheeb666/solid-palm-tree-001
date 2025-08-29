@@ -39,10 +39,10 @@ const PAYPAL_BASE_URL =
   process.env.PAYPAL_ENVIRONMENT === "production"
     ? "https://api-m.paypal.com"
     : process.env.PAYPAL_ENVIRONMENT === "sandbox"
-    ? "https://api-m.sandbox.paypal.com"
-    : process.env.NODE_ENV === "production"
-    ? "https://api-m.paypal.com"
-    : "https://api-m.sandbox.paypal.com";
+      ? "https://api-m.sandbox.paypal.com"
+      : process.env.NODE_ENV === "production"
+        ? "https://api-m.paypal.com"
+        : "https://api-m.sandbox.paypal.com";
 
 // Get PayPal access token
 const getPayPalAccessToken = async (): Promise<string> => {
@@ -352,7 +352,8 @@ export const handleProcessPayment: RequestHandler = async (req, res) => {
             to: recipientEmail,
             paymentData: {
               customerName: user
-                ? (`${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email)
+                ? `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+                  user.email
                 : booking.contact_email,
               pnr: booking.pnr,
               transactionId: transaction.id,
