@@ -45,10 +45,16 @@ export default function Contact() {
       if (!res.ok || !data?.success) {
         throw new Error(data?.message || "Failed to submit message");
       }
-      toast({ title: "Message sent", description: "We’ll get back to you shortly." });
+      toast({
+        title: "Message sent",
+        description: "We’ll get back to you shortly.",
+      });
       setFormData({ name: "", email: "", message: "" });
     } catch (err: any) {
-      toast({ title: "Could not send message", description: err?.message || "Please try again." });
+      toast({
+        title: "Could not send message",
+        description: err?.message || "Please try again.",
+      });
     } finally {
       setIsSubmitting(false);
     }
