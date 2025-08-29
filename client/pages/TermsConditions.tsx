@@ -10,7 +10,7 @@ export default function TermsConditions() {
   return (
     <div className="min-h-screen bg-ob-background font-plus-jakarta">
       {/* Header */}
-      <header className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-36 py-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <header className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-36 py-6 flex justify-between items-center">
         <div
           className="flex items-center cursor-pointer"
           onClick={() => navigate("/")}
