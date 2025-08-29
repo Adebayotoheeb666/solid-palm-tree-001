@@ -12,7 +12,13 @@ export const handleContactSubmit: RequestHandler = async (req, res) => {
   try {
     const parsed = contactSchema.safeParse(req.body);
     if (!parsed.success) {
-      return res.status(400).json({ success: false, message: "Invalid form data", errors: parsed.error.errors });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Invalid form data",
+          errors: parsed.error.errors,
+        });
     }
     const { name, email, message } = parsed.data;
 
@@ -31,12 +37,16 @@ export const handleContactSubmit: RequestHandler = async (req, res) => {
     });
 
     if (!ok) {
-      return res.status(500).json({ success: false, message: "Failed to send email" });
+      return res
+        .status(500)
+        .json({ success: false, message: "Failed to send email" });
     }
 
     return res.json({ success: true, message: "Message sent" });
   } catch (e) {
     console.error("Contact form error:", e);
-    return res.status(500).json({ success: false, message: "Internal server error" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 };

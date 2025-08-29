@@ -828,13 +828,17 @@ export default function Payment() {
                   </div>
                 )}
                 <div className="grid grid-cols-[auto,1fr] gap-x-8 gap-y-2 items-baseline">
-                  <span className="text-lg lg:text-xl font-bold">Base Price:</span>
+                  <span className="text-lg lg:text-xl font-bold">
+                    Base Price:
+                  </span>
                   <span className="text-xl lg:text-2xl font-bold">
                     {getCurrency()}
                     {getBasePrice().toFixed(2)}
                   </span>
 
-                  <span className="text-lg lg:text-xl font-bold">Passengers:</span>
+                  <span className="text-lg lg:text-xl font-bold">
+                    Passengers:
+                  </span>
                   <span className="text-xl lg:text-2xl font-bold">
                     {passengerData?.passengers?.length || 1}
                   </span>
@@ -847,7 +851,9 @@ export default function Payment() {
 
                   {routeData && (
                     <>
-                      <span className="text-lg lg:text-xl font-bold">Route:</span>
+                      <span className="text-lg lg:text-xl font-bold">
+                        Route:
+                      </span>
                       <span className="text-xl lg:text-2xl font-bold">
                         {routeData.from?.city} → {routeData.to?.city}
                       </span>
