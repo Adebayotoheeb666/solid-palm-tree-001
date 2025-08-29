@@ -1,7 +1,11 @@
 import { useNavigate } from "react-router-dom";
+import MobileNav from "../components/MobileNav";
 
 export default function TermsConditions() {
   const navigate = useNavigate();
+  const handleBookNow = () => {
+    navigate("/userform/route");
+  };
 
   return (
     <div className="min-h-screen bg-ob-background font-plus-jakarta">
@@ -19,7 +23,7 @@ export default function TermsConditions() {
             onClick={() => navigate("/")}
           />
         </div>
-        <nav className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
+        <nav className="hidden lg:flex items-center gap-4">
           <button
             className="px-4 sm:px-8 py-2 sm:py-3 text-ob-dark font-bold text-base sm:text-lg hover:bg-gray-100 rounded-lg transition-colors"
             onClick={() => navigate("/contact")}
@@ -33,6 +37,7 @@ export default function TermsConditions() {
             Book now
           </button>
         </nav>
+        <MobileNav className="lg:hidden" handleBookNow={handleBookNow} />
       </header>
 
       {/* Main Content */}
