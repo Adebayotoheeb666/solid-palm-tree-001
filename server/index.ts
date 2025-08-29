@@ -333,12 +333,11 @@ export async function createServer() {
   );
 
   // Payment routes (authenticated)
-  app.post("/api/payments", authMiddleware, handleProcessPayment);
+  app.post("/api/payments", handleProcessPayment);
   app.post("/api/payments/paypal/create-order", handleCreatePayPalOrder);
   app.post("/api/payments/paypal/capture", handleCapturePayPalPayment);
   app.post(
     "/api/payments/stripe/create-intent",
-    authMiddleware,
     handleCreateStripePaymentIntent,
   );
   app.get("/api/payments/stripe/config", handleGetStripeConfig);
