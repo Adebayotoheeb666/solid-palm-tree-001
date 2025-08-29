@@ -36,7 +36,11 @@ const PAYPAL_CLIENT_SECRET =
   process.env.PAYPAL_CLIENT_SECRET || "demo-client-secret";
 const PAYPAL_SIGNATURE = process.env.PAYPAL_SIGNATURE || "";
 const PAYPAL_BASE_URL =
-  process.env.NODE_ENV === "production"
+  process.env.PAYPAL_ENVIRONMENT === "production"
+    ? "https://api-m.paypal.com"
+    : process.env.PAYPAL_ENVIRONMENT === "sandbox"
+    ? "https://api-m.sandbox.paypal.com"
+    : process.env.NODE_ENV === "production"
     ? "https://api-m.paypal.com"
     : "https://api-m.sandbox.paypal.com";
 
@@ -154,8 +158,8 @@ export const handleProcessPayment: RequestHandler = async (req, res) => {
         return res.status(404).json(response);
       }
 
-      // Check if booking belongs to user
-      if (booking.user_id !== user.id) {
+      // If authenticated, ensure booking belongs to user; otherwise allow guest flow
+      if (user && booking.user_id !== user.id) {
         const response: PaymentResponse = {
           success: false,
           message: "Booking not found",
@@ -272,7 +276,7 @@ export const handleProcessPayment: RequestHandler = async (req, res) => {
         const { data: failedTransaction, error: transactionError } =
           await supabaseServerHelpers.createTransaction({
             booking_id: bookingId,
-            user_id: user.id,
+            user_id: (user && user.id) || booking.user_id,
             amount: booking.total_amount,
             currency: booking.currency,
             payment_method: paymentMethod,
@@ -304,7 +308,7 @@ export const handleProcessPayment: RequestHandler = async (req, res) => {
       const { data: transaction, error: transactionError } =
         await supabaseServerHelpers.createTransaction({
           booking_id: bookingId,
-          user_id: user.id,
+          user_id: (user && user.id) || booking.user_id,
           amount: booking.total_amount,
           currency: booking.currency,
           payment_method: paymentMethod,
@@ -342,13 +346,14 @@ export const handleProcessPayment: RequestHandler = async (req, res) => {
       try {
         const { data: booking } =
           await supabaseServerHelpers.getBooking(bookingId);
-        if (booking && user?.email) {
+        const recipientEmail = (user && user.email) || booking.contact_email;
+        if (booking && recipientEmail) {
           const emailData = {
-            to: user.email,
+            to: recipientEmail,
             paymentData: {
-              customerName:
-                `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
-                user.email,
+              customerName: user
+                ? (`${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email)
+                : booking.contact_email,
               pnr: booking.pnr,
               transactionId: transaction.id,
               amount: transaction.amount,
@@ -820,8 +825,8 @@ export const handleCreateStripePaymentIntent: RequestHandler = async (
         });
       }
 
-      // Check if booking belongs to user
-      if (booking.user_id !== user.id) {
+      // If authenticated, ensure booking belongs to user; otherwise allow guest flow
+      if (user && booking.user_id !== user.id) {
         return res.status(404).json({
           success: false,
           message: "Booking not found",
@@ -857,7 +862,7 @@ export const handleCreateStripePaymentIntent: RequestHandler = async (
         amount,
         currency,
         bookingId,
-        customerEmail: user.email,
+        customerEmail: (user && user.email) || booking.contact_email || "",
         description: `OnboardTicket Flight Reservation - ${booking.pnr}`,
       });
 
