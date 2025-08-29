@@ -36,7 +36,7 @@ const Footer: React.FC = memo(() => {
                 <img
                   src="/onboard/logos-01.png"
                   alt="OnboardTicket Logo"
-                  className="h-8 sm:h-10 md:h-12 w-auto object-contain cursor-pointer"
+                  className="h-16 sm:h-20 md:h-24 w-auto object-contain cursor-pointer"
                   loading="lazy"
                   onClick={handleLogoClick}
                 />
