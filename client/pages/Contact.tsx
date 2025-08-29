@@ -2,6 +2,7 @@ import { useState } from "react";
 import { MessageCircle, BookOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ContactMenu from "./ContactMenu";
+import MobileNav from "../components/MobileNav";
 
 export default function Contact() {
   const navigate = useNavigate();
@@ -27,6 +28,10 @@ export default function Contact() {
     console.log("Form submitted:", formData);
   };
 
+  const handleBookNow = () => {
+    navigate("/userform/route");
+  };
+
   return (
     <div className="min-h-screen bg-[#F4F4FF] font-plus-jakarta">
       {/* Header */}
@@ -43,7 +48,7 @@ export default function Contact() {
             onClick={() => navigate("/")}
           />
         </div>
-        <nav className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
+        <nav className="hidden lg:flex items-center gap-4">
           <button
             className="px-4 sm:px-8 py-2 sm:py-3 text-ob-dark font-bold text-base sm:text-lg hover:bg-gray-100 rounded-lg transition-colors"
             onClick={() => navigate("/contact")}
@@ -57,6 +62,7 @@ export default function Contact() {
             Book now
           </button>
         </nav>
+        <MobileNav className="lg:hidden" handleBookNow={handleBookNow} />
       </header>
 
       {/* Hero Section */}
