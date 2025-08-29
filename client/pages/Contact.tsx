@@ -3,6 +3,7 @@ import { MessageCircle, BookOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ContactMenu from "./ContactMenu";
 import MobileNav from "../components/MobileNav";
+import { useToast } from "../hooks/use-toast";
 
 export default function Contact() {
   const navigate = useNavigate();
@@ -11,6 +12,8 @@ export default function Contact() {
     email: "",
     message: "",
   });
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -22,10 +25,33 @@ export default function Contact() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
-    console.log("Form submitted:", formData);
+    if (isSubmitting) return;
+
+    if (!formData.name || !formData.email || !formData.message) {
+      toast({ title: "Please fill out all fields" });
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json().catch(() => ({ success: false }));
+      if (!res.ok || !data?.success) {
+        throw new Error(data?.message || "Failed to submit message");
+      }
+      toast({ title: "Message sent", description: "We’ll get back to you shortly." });
+      setFormData({ name: "", email: "", message: "" });
+    } catch (err: any) {
+      toast({ title: "Could not send message", description: err?.message || "Please try again." });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleBookNow = () => {
@@ -176,9 +202,10 @@ export default function Contact() {
               <div className="pt-8">
                 <button
                   type="submit"
-                  className="px-12 py-4 bg-[#001AFF] text-white font-bold text-xl lg:text-2xl rounded-3xl hover:bg-blue-700 transition-colors shadow-lg"
+                  disabled={isSubmitting}
+                  className="px-12 py-4 bg-[#001AFF] text-white font-bold text-xl lg:text-2xl rounded-3xl hover:bg-blue-700 transition-colors shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Submit Message
+                  {isSubmitting ? "Sending..." : "Submit Message"}
                 </button>
               </div>
             </form>
