@@ -11,6 +11,7 @@ export default function Contact() {
     email: "",
     message: "",
   });
+  const [successMessage, setSuccessMessage] = useState("");
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -22,10 +23,26 @@ export default function Contact() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
-    console.log("Form submitted:", formData);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        alert(data.message || "Failed to send message");
+        setSuccessMessage("");
+        return;
+      }
+      setSuccessMessage("Message sent successfully!");
+      setFormData({ name: "", email: "", message: "" });
+    } catch (err) {
+      alert("Network error. Please try again.");
+      setSuccessMessage("");
+    }
   };
 
   const handleBookNow = () => {
@@ -134,7 +151,11 @@ export default function Contact() {
               Fill out the form below and we'll get back to you within 30
               minutes, on average.
             </p>
-
+            {successMessage && (
+              <div className="mb-6 p-4 rounded-xl bg-green-100 text-green-800 font-semibold text-center">
+                {successMessage}
+              </div>
+            )}
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Name Field */}
               <div>
@@ -219,25 +240,25 @@ export default function Contact() {
               </p>
             </div>
             {/* About */}
-            <div className="space-y-4">
-              <h4 className="text-lg sm:text-xl font-bold text-[#3150DA]">
+            <div className="space-y-2 md:space-y-4 flex flex-col items-start md:items-center justify-start md:justify-center">
+              <h4 className="text-base md:text-lg font-bold text-[#3150DA]">
                 About
               </h4>
-              <ul className="space-y-3 text-sm sm:text-base">
+              <ul className="space-y-1 md:space-y-2 text-xs sm:text-sm font-semibold text-black">
                 <li
-                  className="text-black cursor-pointer hover:text-[#3839C9] transition-colors duration-200 font-medium"
+                  className="cursor-pointer hover:text-[#3839C9]"
                   onClick={() => navigate("/about")}
                 >
                   Who We are ?
                 </li>
                 <li
-                  className="text-black cursor-pointer hover:text-[#3839C9] transition-colors duration-200 font-medium"
+                  className="cursor-pointer hover:text-[#3839C9]"
                   onClick={() => navigate("/privacy-policy")}
                 >
                   Privacy Policy
                 </li>
                 <li
-                  className="text-black cursor-pointer hover:text-[#3839C9] transition-colors duration-200 font-medium"
+                  className="cursor-pointer hover:text-[#3839C9]"
                   onClick={() => navigate("/terms-conditions")}
                 >
                   Terms & Conditions
@@ -245,25 +266,25 @@ export default function Contact() {
               </ul>
             </div>
             {/* Get Help */}
-            <div className="space-y-4">
-              <h4 className="text-lg sm:text-xl font-bold text-[#3150DA]">
+            <div className="space-y-2 md:space-y-4 flex flex-col items-start md:items-center justify-start md:justify-center">
+              <h4 className="text-base md:text-lg font-bold text-[#3150DA]">
                 Get Help
               </h4>
-              <ul className="space-y-3 text-sm sm:text-base">
+              <ul className="space-y-1 md:space-y-2 text-xs sm:text-sm font-semibold text-black">
                 <li
-                  className="text-black cursor-pointer hover:text-[#3839C9] transition-colors duration-200 font-medium"
+                  className="cursor-pointer hover:text-[#3839C9]"
                   onClick={() => navigate("/faq")}
                 >
                   FAQs
                 </li>
                 <li
-                  className="text-black cursor-pointer hover:text-[#3839C9] transition-colors duration-200 font-medium"
+                  className="cursor-pointer hover:text-[#3839C9]"
                   onClick={() => navigate("/payment")}
                 >
                   Payment
                 </li>
                 <li
-                  className="text-black cursor-pointer hover:text-[#3839C9] transition-colors duration-200 font-medium"
+                  className="cursor-pointer hover:text-[#3839C9]"
                   onClick={() => navigate("/contact")}
                 >
                   Contact Support 24/7
@@ -271,15 +292,15 @@ export default function Contact() {
               </ul>
             </div>
             {/* Follow Us */}
-            <div className="space-y-4">
-              <h4 className="text-lg sm:text-xl font-bold text-[#3150DA]">
+            <div className="space-y-2 md:space-y-4 flex flex-col items-start md:items-center justify-start md:justify-center">
+              <h4 className="text-base md:text-lg font-bold text-[#3150DA]">
                 Follow US
               </h4>
-              <div className="space-y-2">
-                <h5 className="text-lg sm:text-xl font-bold text-[#3150DA]">
+              <div className="space-y-1 md:space-y-2">
+                <h5 className="text-base md:text-lg font-bold text-[#3150DA]">
                   Stay in touch
                 </h5>
-                <p className="text-sm sm:text-base text-black cursor-pointer hover:text-[#3839C9] transition-colors duration-200 font-medium">
+                <p className="text-xs sm:text-sm font-semibold text-black">
                   Blog
                 </p>
               </div>
@@ -290,3 +311,4 @@ export default function Contact() {
     </div>
   );
 }
+
